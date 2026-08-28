@@ -4,12 +4,10 @@ import { getTrendigMovies, updateSearchCount } from "@/app/services/appwrite";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useDebounce } from "react-use";
 import MovieCard from "./components/card";
 import { Search } from "./components/search";
 import { Spinner } from "./components/spinner";
 import "./globals.css";
-
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
@@ -30,12 +28,20 @@ const App = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Debounce the search term to avoid too many API calls
+  // Debounce the search term to avoid too many API calls without relying on a third-party hook
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  useDebounce(() => setDebouncedSearchTerm(searchTerm), 700, [searchTerm]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
 
   // Trending movies
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(false);
 
   const fetchMovies = async (query = "") => {
     setLoading(true);
@@ -82,19 +88,24 @@ const App = () => {
   };
 
   const loadTrendingMovies = async () => {
+    setTrendingLoading(true);
+
     try {
       const trending = await getTrendigMovies();
       setTrendingMovies(trending ?? []);
     } catch (error) {
       console.error("Error fetching trending movies:", error);
+    } finally {
+      setTrendingLoading(false);
     }
   };
 
-  // Loading Movies debouncing for Search
+  // Load the full movie list slightly later so the top-of-page trending section
+  // feels like it loads first and the page reads from top to bottom.
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       void fetchMovies(debouncedSearchTerm);
-    }, 0);
+    }, 100);
 
     return () => window.clearTimeout(timeoutId);
   }, [debouncedSearchTerm]);
@@ -114,7 +125,14 @@ const App = () => {
 
       <div className="wrapper">
         <header>
-          <Image src="/hero.png" alt="Hero" width={1200} height={500} priority className="  xs:w-50 md:w-1/3"  />
+          <Image
+            src="/hero.png"
+            alt="Hero"
+            width={1200}
+            height={500}
+            priority
+            className="  xs:w-50 md:w-1/3"
+          />
           <h1>
             Find <span className="text-gradient">Movies</span> You&apos;ll Enjoy
             Without the Hassle
@@ -122,14 +140,18 @@ const App = () => {
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
-        {trendingMovies.length > 0 && (
-          <section className="trending">
-            <h2>Trending Movies</h2>
+        <section className="trending">
+          <h2>Trending Movies</h2>
+          {trendingLoading ? (
+            <Spinner />
+          ) : trendingMovies.length > 0 ? (
             <ul>
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
                   <p>{index + 1}</p>
-                  <Link href={movie.movie_id ? `/movies/${movie.movie_id}` : "/"}>
+                  <Link
+                    href={movie.movie_id ? `/movies/${movie.movie_id}` : "/"}
+                  >
                     <Image
                       alt={`${movie.title} Poster`}
                       src={movie.poster_url || "/no-movie.png"}
@@ -144,8 +166,8 @@ const App = () => {
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          ) : null}
+        </section>
 
         <section className="all-movies">
           <h2>All Movies</h2>

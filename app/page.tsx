@@ -1,7 +1,8 @@
 "use client";
 
-import { getTrendingMovies, updateSearchCount } from "@/appwrite";
+import { getTrendigMovies, updateSearchCount } from "@/app/services/appwrite";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDebounce } from "react-use";
 import MovieCard from "./components/card";
@@ -11,7 +12,6 @@ import "./globals.css";
 
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
-
 const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
 const API_OPTIONS = {
@@ -20,21 +20,6 @@ const API_OPTIONS = {
     accept: "application/json",
     Authorization: `Bearer ${API_KEY}`,
   },
-};
-
-type Movie = {
-  id: number;
-  title: string;
-  poster_path: string | null;
-  release_date: string;
-  vote_average: number;
-  original_language: string;
-};
-
-type TrendingMovie = {
-  $id: string;
-  title: string;
-  poster_url?: string;
 };
 
 const App = () => {
@@ -98,8 +83,8 @@ const App = () => {
 
   const loadTrendingMovies = async () => {
     try {
-      const trending = await getTrendingMovies();
-      setTrendingMovies(trending);
+      const trending = await getTrendigMovies();
+      setTrendingMovies(trending ?? []);
     } catch (error) {
       console.error("Error fetching trending movies:", error);
     }
@@ -144,14 +129,18 @@ const App = () => {
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
                   <p>{index + 1}</p>
-                  <Image
-                    src={movie.poster_url || "/no-movie.png"}
-                    alt={movie.title}
-                    width={160}
-                    height={240}
-                    unoptimized
-                  />
-                  {/* <MovieCard key={movie.id} movie={movie} /> */}
+                  <Link href={movie.movie_id ? `/movies/${movie.movie_id}` : "/"}>
+                    <Image
+                      alt={`${movie.title} Poster`}
+                      src={movie.poster_url || "/no-movie.png"}
+                      width={160}
+                      height={240}
+                      unoptimized
+                      onError={(event) => {
+                        event.currentTarget.src = "/no-movie.png";
+                      }}
+                    />
+                  </Link>
                 </li>
               ))}
             </ul>

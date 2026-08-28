@@ -1,10 +1,10 @@
-import React from "react";
+import Image from "next/image";
 
 export const Search = ({ searchTerm, setSearchTerm }) => {
   return (
     <div className="search">
       <div>
-        <img src="/search.svg" alt="Search Icon" />
+        <Image src="/search.svg" alt="Search Icon" width={20} height={20} />
         <input
           id="search"
           type="text"

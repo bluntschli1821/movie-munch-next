@@ -1,5 +1,9 @@
+import Image from "next/image";
+import Link from "next/link";
+
 const MovieCard = ({
   movie: {
+    id,
     title,
     poster_path,
     release_date,
@@ -9,19 +13,28 @@ const MovieCard = ({
 }) => {
   return (
     <div className="movie-card">
-      <img
-        src={
-          poster_path
-            ? `https://image.tmdb.org/t/p/w500${poster_path}`
-            : "/no-movie.png"
-        }
-        alt={title}
-      />
+      <Link href={`/movies/${id}`} aria-label={`View details for ${title}`}>
+        <Image
+          width={500}
+          height={750}
+          className="poster"
+          src={
+            poster_path
+              ? `https://image.tmdb.org/t/p/w500${poster_path}`
+              : "/no-movie.png"
+          }
+          alt={`${title} Poster`}
+          unoptimized
+          onError={(event) => {
+            event.currentTarget.src = "/no-movie.png";
+          }}
+        />
+      </Link>
       <div className="mt-4">
         <h3>{title}</h3>
         <div className="content">
           <div className="rating">
-            <img src="/star.svg" alt="Star" />
+            <Image src="/star.svg" alt="Star" width={16} height={16} />
             <p>{vote_average ? vote_average.toFixed(1) : "N/A"}</p>
           </div>
           <span>•</span>

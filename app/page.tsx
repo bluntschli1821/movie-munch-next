@@ -114,7 +114,7 @@ const App = () => {
 
       <div className="wrapper">
         <header>
-          <Image src="/hero.png" alt="Hero" width={1200} height={500} priority />
+          <Image src="/hero.png" alt="Hero" width={1200} height={500} priority className="  xs:w-50 md:w-1/3 sm:w-20  "  />
           <h1>
             Find <span className="text-gradient">Movies</span> You&apos;ll Enjoy
             Without the Hassle

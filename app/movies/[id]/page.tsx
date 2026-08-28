@@ -1,7 +1,8 @@
 import { fetchMovieDetails } from "@/app/services/api";
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link";
 import { notFound } from "next/navigation";
+// import { CornerUpLeft } from "@deemlol/next-icons";
 
 interface MovieDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -29,9 +30,10 @@ export default async function MovieDetailsPage({
   return (
     <main>
       <div className="wrapper">
-        <Link href="/" className="mb-8 text-light-200 hover:text-white">
-          &larr; Back to movies
-        </Link>
+        {/* <Link href="/" className="mb-8 text-light-200 hover:text-white inline-flex items-center gap-2">
+          <CornerUpLeft className="h-5 w-5" />
+          Back to movies
+        </Link> */}
 
         <article className="mx-auto grid max-w-5xl gap-8 md:grid-cols-[minmax(240px,360px)_1fr]">
           <Image
@@ -43,7 +45,7 @@ export default async function MovieDetailsPage({
             alt={movie.title}
             width={500}
             height={750}
-            className="h-auto w-full rounded-2xl"
+            className="lg:h-auto md:h-auto w-full rounded-2xl sm:h-150 xs:*:h-75"
             unoptimized
             priority
           />
@@ -60,24 +62,44 @@ export default async function MovieDetailsPage({
 
             <div className="mt-4 inline-flex items-center gap-2 rounded-md bg-dark-100 px-3 py-2 text-white">
               <span aria-hidden="true">&#9733;</span>
-              <strong>{movie.vote_average.toFixed(1)}/10</strong>
+              <strong>{Math.round(movie.vote_average)}/10</strong>
               <span className="text-light-200">({movie.vote_count} votes)</span>
             </div>
 
             <Detail label="Overview" value={movie.overview || "N/A"} />
             <Detail
               label="Genres"
-              value={movie.genres.length
-                ? movie.genres.map((genre) => genre.name).join(", ")
-                : "N/A"}
+              value={
+                movie.genres.length
+                  ? movie.genres.map((genre) => genre.name).join(", ")
+                  : "N/A"
+              }
             />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <Detail
+                label="Budget"
+                value={
+                  movie.budget ? `$${movie.budget / 1_000_000} million` : "N/A"
+                }
+              />
+              <Detail
+                label="Revenue"
+                value={
+                  movie.revenue
+                    ? `$${Math.round(movie.revenue) / 1_000_000} million`
+                    : "N/A"
+                }
+              />
+            </div>
             <Detail
               label="Production Companies"
-              value={movie.production_companies.length
-                ? movie.production_companies
-                    .map((company) => company.name)
-                    .join(", ")
-                : "N/A"}
+              value={
+                movie.production_companies.length
+                  ? movie.production_companies
+                      .map((company) => company.name)
+                      .join(", ")
+                  : "N/A"
+              }
             />
           </div>
         </article>

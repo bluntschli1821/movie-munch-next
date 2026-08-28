@@ -2,7 +2,7 @@ export const Spinner = () => {
   return (
     <div
       role="status"
-      className="flex justify-center items-center min-h-[150px] w-full"
+      className="flex justify-center items-center min-h-37.5 w-full"
     >
       <svg
         aria-hidden="true"

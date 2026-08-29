@@ -1,24 +1,15 @@
 "use client";
 
-import { getTrendigMovies, updateSearchCount } from "@/app/services/appwrite";
+import { API_BASE_URL, API_OPTIONS } from "@/components/constants";
+import { getTrendigMovies, updateSearchCount } from "@/services/appwrite";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import MovieCard from "./components/card";
-import { Search } from "./components/search";
-import { Spinner } from "./components/spinner";
-import "./globals.css";
+import MovieCard from "../components/card";
+import { Search } from "../components/search";
+import { Spinner } from "../components/spinner";
+import "@/globals.css";
 
-const API_BASE_URL = "https://api.themoviedb.org/3";
-const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-
-const API_OPTIONS = {
-  method: "GET",
-  headers: {
-    accept: "application/json",
-    Authorization: `Bearer ${API_KEY}`,
-  },
-};
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,7 +96,7 @@ const App = () => {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       void fetchMovies(debouncedSearchTerm);
-    }, 100);
+    }, 300);
 
     return () => window.clearTimeout(timeoutId);
   }, [debouncedSearchTerm]);
@@ -114,7 +105,7 @@ const App = () => {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       void loadTrendingMovies();
-    }, 0);
+    }, 50);
 
     return () => window.clearTimeout(timeoutId);
   }, []);

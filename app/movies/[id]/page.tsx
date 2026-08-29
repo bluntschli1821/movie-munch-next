@@ -1,8 +1,7 @@
-import { fetchMovieDetails } from "@/app/services/api";
+import { fetchMovieDetails } from "@/services/api";
 import Image from "next/image";
 // import Link from "next/link";
 import { notFound } from "next/navigation";
-// import { CornerUpLeft } from "@deemlol/next-icons";
 
 interface MovieDetailsPageProps {
   params: Promise<{ id: string }>;

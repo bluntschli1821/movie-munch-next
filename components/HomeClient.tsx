@@ -298,7 +298,7 @@ export default function HomeClient() {
                 <MovieCard
                   key={movie.id}
                   movie={movie}
-                  onSelect={(movieId) => {
+                  onSelect={(movieId: number) => {
                     persistScroll();
                     setSelectedMovieId(movieId);
                   }}

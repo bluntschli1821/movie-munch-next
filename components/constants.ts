@@ -15,3 +15,4 @@ export const TRENDING_LOAD_DELAY_MS = 50;
 export const TRENDING_CACHE_KEY = "movie-munch-trending";
 export const TRENDING_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 export const EMPTY_POSTER_FALLBACK = "/no-movie.png";
+export const HOME_SCROLL_KEY = "movie-munch-home-scroll";

@@ -7,16 +7,17 @@ import {
     API_BASE_URL,
     API_OPTIONS,
     EMPTY_POSTER_FALLBACK,
+    HOME_SCROLL_KEY,
     SEARCH_DEBOUNCE_MS,
     TRENDING_CACHE_KEY,
     TRENDING_CACHE_TTL_MS,
     TRENDING_LOAD_DELAY_MS,
 } from "@/components/constants";
+import MovieDetailModal from "@/components/MovieDetailModal";
 import { Search } from "@/components/search";
 import { Spinner } from "@/components/spinner";
 import { getTrendigMovies, updateSearchCount } from "@/services/appwrite";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // Main landing page for Movie Munch.
@@ -26,6 +27,9 @@ import { useEffect, useState } from "react";
 // 3) displaying trending movies and the full movie list.
 // The component coordinates data from TMDB (movie catalog) and Appwrite (trending/search tracking).
 export default function HomeClient() {
+  // selectedMovieId keeps the movie currently opened in the modal without forcing a route change.
+  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
+
   // searchTerm holds the text typed in the search box so the form remains controlled.
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -168,6 +172,56 @@ export default function HomeClient() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
+  const persistScroll = () => {
+    window.sessionStorage.setItem(HOME_SCROLL_KEY, String(window.scrollY));
+  };
+
+  const restoreScroll = () => {
+    const savedScrollTop = window.sessionStorage.getItem(HOME_SCROLL_KEY);
+
+    if (!savedScrollTop) {
+      return;
+    }
+
+    const parsedValue = Number(savedScrollTop);
+
+    if (Number.isFinite(parsedValue)) {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: parsedValue,
+          behavior: "smooth",
+        });
+      });
+    }
+  };
+
+  // Restore the user's last scroll position when the browser brings the home page back from history.
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const handleScroll = () => {
+      persistScroll();
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("pageshow", restoreScroll);
+    window.addEventListener("popstate", restoreScroll);
+    window.addEventListener("beforeunload", persistScroll);
+    window.addEventListener("pagehide", persistScroll);
+
+    restoreScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("pageshow", restoreScroll);
+      window.removeEventListener("popstate", restoreScroll);
+      window.removeEventListener("beforeunload", persistScroll);
+      window.removeEventListener("pagehide", persistScroll);
+    };
+  }, []);
+
   return (
     <main>
       <div className="pattern" />
@@ -200,8 +254,19 @@ export default function HomeClient() {
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
                   <p>{index + 1}</p>
-                  <Link
-                    href={movie.movie_id ? `/movies/${movie.movie_id}` : "/"}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (movie.movie_id) {
+                        persistScroll();
+                        window.dispatchEvent(
+                          new CustomEvent("open-movie-modal", {
+                            detail: { id: Number(movie.movie_id) },
+                          })
+                        );
+                      }
+                    }}
+                    className="cursor-pointer border-0 bg-transparent p-0"
                   >
                     <Image
                       alt={`${movie.title} Poster`}
@@ -213,7 +278,7 @@ export default function HomeClient() {
                         event.currentTarget.src = EMPTY_POSTER_FALLBACK;
                       }}
                     />
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -230,12 +295,24 @@ export default function HomeClient() {
           ) : (
             <ul>
               {movies.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onSelect={(movieId) => {
+                    persistScroll();
+                    setSelectedMovieId(movieId);
+                  }}
+                />
               ))}
             </ul>
           )}
         </section>
       </div>
+
+      <MovieDetailModal
+        movieId={selectedMovieId}
+        onClose={() => setSelectedMovieId(null)}
+      />
     </main>
   );
 }

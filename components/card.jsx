@@ -1,19 +1,28 @@
-import Image from "next/image";
-import Link from "next/link";
+"use client";
 
-const MovieCard = ({
-  movie: {
+import Image from "next/image";
+
+const MovieCard = ({ movie, onSelect }) => {
+  const {
     id,
     title,
     poster_path,
     release_date,
     vote_average,
     original_language,
-  },
-}) => {
+  } = movie;
+
   return (
     <div className="movie-card">
-      <Link href={`/movies/${id}`} aria-label={`View details for ${title}`}>
+      <button
+        type="button"
+        aria-label={`View details for ${title}`}
+        onClick={() => {
+          sessionStorage.setItem("movie-munch-home-scroll", String(window.scrollY));
+          onSelect?.(id);
+        }}
+        className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+      >
         <Image
           width={500}
           height={750}
@@ -29,7 +38,7 @@ const MovieCard = ({
             event.currentTarget.src = "/no-movie.png";
           }}
         />
-      </Link>
+      </button>
       <div className="mt-4">
         <h3>{title}</h3>
         <div className="content">

@@ -84,7 +84,7 @@ export default function MovieDetailModal({ movieId, onClose }: Props) {
         className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-[#101827] p-6 text-white shadow-2xl ring-1 ring-white/10"
         onClick={(event) => event.stopPropagation()}
       >
-        <button
+        <button 
           type="button"
           onClick={onClose}
           className="absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-black/20 px-3 py-1 text-sm text-white transition hover:bg-white/10"

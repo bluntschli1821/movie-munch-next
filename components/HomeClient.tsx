@@ -3,15 +3,15 @@
 import MovieCard from "@/components/card";
 // Imported from constants.ts to centralize configuration and avoid magic numbers in the code.
 import {
-    ALL_MOVIES_LOAD_DELAY_MS,
-    API_BASE_URL,
-    API_OPTIONS,
-    EMPTY_POSTER_FALLBACK,
-    HOME_SCROLL_KEY,
-    SEARCH_DEBOUNCE_MS,
-    TRENDING_CACHE_KEY,
-    TRENDING_CACHE_TTL_MS,
-    TRENDING_LOAD_DELAY_MS,
+  ALL_MOVIES_LOAD_DELAY_MS,
+  API_BASE_URL,
+  API_OPTIONS,
+  EMPTY_POSTER_FALLBACK,
+  HOME_SCROLL_KEY,
+  SEARCH_DEBOUNCE_MS,
+  TRENDING_CACHE_KEY,
+  TRENDING_CACHE_TTL_MS,
+  TRENDING_LOAD_DELAY_MS,
 } from "@/components/constants";
 import MovieDetailModal from "@/components/MovieDetailModal";
 import { Search } from "@/components/search";
@@ -143,7 +143,7 @@ export default function HomeClient() {
           JSON.stringify({
             fetchedAt: Date.now(),
             movies: nextTrending,
-          })
+          }),
         );
       }
     } catch (error) {
@@ -251,6 +251,7 @@ export default function HomeClient() {
             <Spinner />
           ) : trendingMovies.length > 0 ? (
             <ul>
+              {/* If cached will show what was cached */}
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
                   <p>{index + 1}</p>
@@ -259,11 +260,7 @@ export default function HomeClient() {
                     onClick={() => {
                       if (movie.movie_id) {
                         persistScroll();
-                        window.dispatchEvent(
-                          new CustomEvent("open-movie-modal", {
-                            detail: { id: Number(movie.movie_id) },
-                          })
-                        );
+                        setSelectedMovieId(Number(movie.movie_id));
                       }
                     }}
                     className="cursor-pointer border-0 bg-transparent p-0"
@@ -271,6 +268,36 @@ export default function HomeClient() {
                     <Image
                       alt={`${movie.title} Poster`}
                       src={movie.poster_url || EMPTY_POSTER_FALLBACK}
+                      width={160}
+                      height={240}
+                      unoptimized
+                      onError={(event) => {
+                        event.currentTarget.src = EMPTY_POSTER_FALLBACK;
+                      }}
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : trendingMovies.length > 0 ? (
+            <ul>
+              {/* If cached is empty or has no trending movies will show blank placeholders */}
+              {trendingMovies.map((movie, index) => (
+                <li key={movie.$id}>
+                  <p>{index + 1}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (movie.movie_id) {
+                        persistScroll();
+                        // setSelectedMovieId(Number(movie.movie_id));
+                      }
+                    }}
+                    className="cursor-pointer border-0 bg-transparent p-0"
+                  >
+                    <Image
+                      alt={`${movie.title} Poster`}
+                      src={EMPTY_POSTER_FALLBACK}
                       width={160}
                       height={240}
                       unoptimized
